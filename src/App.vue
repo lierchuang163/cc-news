@@ -1,5 +1,7 @@
 <template>
-  <div id="app">这是app主组件</div>
+  <div id="app">
+    <router-view></router-view>
+  </div>
 </template>
 
 <style lang="scss"></style>
