@@ -90,7 +90,7 @@ export default {
         localStorage.setItem('token', token)
         localStorage.setItem('user_id', user.id)
         this.$toast.success(message)
-        this.$router.push('/profile')
+        this.$router.push('/home')
         // alert(message)
       } else {
         this.$toast.fail(message)

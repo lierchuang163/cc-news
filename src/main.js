@@ -8,10 +8,23 @@ import 'styles/iconfont.css'
 import 'lib-flexible'
 // 按需引进模块
 import moment from 'moment'
-import { Toast, Button, Dialog, Field, RadioGroup, Radio, Uploader } from 'vant'
+import {
+  Toast,
+  Button,
+  Dialog,
+  Field,
+  RadioGroup,
+  Radio,
+  Uploader,
+  List,
+  Tab,
+  Tabs,
+  PullRefresh,
+} from 'vant'
 import axios from 'axios'
 import CcNav from 'components/cc-nav.vue'
 import CcBar from 'components/cc-bar.vue'
+import CcPost from 'components/cc-post.vue'
 // 在Vue中注册一下
 Vue.config.productionTip = false
 Vue.use(Field)
@@ -21,11 +34,19 @@ Vue.use(Dialog)
 Vue.use(RadioGroup)
 Vue.use(Radio)
 Vue.use(Uploader)
-Vue.filter('time', (value) => {
-  return moment(value).format('YYYY-MM-DD')
+Vue.use(List)
+Vue.use(Tab)
+Vue.use(Tabs)
+Vue.use(PullRefresh)
+Vue.filter('time', (value, str = 'YYYY-MM-DD') => {
+  return moment(value).format(str)
+})
+Vue.filter('fixUrl', (value) => {
+  return axios.defaults.baseURL + value
 })
 Vue.component('cc-nav', CcNav)
 Vue.component('cc-bar', CcBar)
+Vue.component('cc-post', CcPost)
 // axios优化1:将axios挂载到vue原型上
 Vue.prototype.$axios = axios
 // axios优化2:配置基础地址,只要配置了基础地址,将来axios的请求都会自动拼上这个基准路径

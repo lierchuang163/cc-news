@@ -5,20 +5,40 @@ import Register from 'views/Register.vue'
 import Profile from 'views/Profile.vue'
 import editInfo from 'views/editInfo.vue'
 import myFocus from 'views/Myfocus.vue'
+import Favorite from 'views/Favorite.vue'
+import Comments from 'views/Comments.vue'
+import Home from 'views/Home.vue'
+import PostDetail from 'views/PostDetail.vue'
+import Test from 'views/Test.vue'
 Vue.use(VueRouter)
+
+const originalPush = VueRouter.prototype.push
+// 解决Vue-Router升级导致的Uncaught(in promise) navigation guard问题
+VueRouter.prototype.push = function push(location, onResolve, onReject) {
+  if (onResolve || onReject) {
+    return originalPush.call(this, location, onResolve, onReject)
+  }
+  return originalPush.call(this, location).catch((err) => err)
+}
+
 const router = new VueRouter({
   routes: [
-    { path: '/', redirect: '/login' },
+    { path: '/', redirect: '/home' },
     { path: '/login', name: 'login', component: Login },
     { path: '/register', name: 'register', component: Register },
     { path: '/profile', name: 'profile', component: Profile },
     { path: '/editinfo', name: 'editinfo', component: editInfo },
     { path: '/myfocus', name: 'myfocus', component: myFocus },
+    { path: '/favorite', name: 'favorite', component: Favorite },
+    { path: '/comments', name: 'comments', component: Comments },
+    { path: '/home', name: 'home', component: Home },
+    { path: '/post-detail/:id', name: 'post-detail', component: PostDetail },
+    { path: '/test', name: 'test', component: Test },
   ],
 })
 
 // 进行登录前置守护拦截
-const AuthUrls = ['/profile', '/editinfo', '/myfocus']
+const AuthUrls = ['/profile', '/editinfo', '/myfocus', '/favorite', '/comments']
 router.beforeEach((to, from, next) => {
   if (AuthUrls.includes(to.path)) {
     const token = localStorage.getItem('token')

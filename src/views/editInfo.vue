@@ -58,11 +58,36 @@
         </van-radio-group>
       </van-dialog>
     </div>
+    <div class="mask" v-show="isShowMask">
+      <vue-cropper
+        ref="cropper"
+        :img="option.img"
+        :outputSize="option.outputSize"
+        :outputType="option.outputType"
+        :info="option.info"
+        :canScale="option.canScale"
+        :autoCrop="option.autoCrop"
+        :autoCropWidth="option.autoCropWidth"
+        :autoCropHeight="option.autoCropHeight"
+        :fixed="option.fixed"
+        :fixedNumber="option.fixedNumber"
+      ></vue-cropper>
+      <van-button @click="crop" class="crop" type="primary">
+        确认裁剪
+      </van-button>
+      <van-button @click="cancel" class="cancel" type="danger"
+        >取消选择</van-button
+      >
+    </div>
   </div>
 </template>
 
 <script>
+import { VueCropper } from 'vue-cropper'
 export default {
+  components: {
+    VueCropper,
+  },
   data() {
     return {
       profile: {},
@@ -75,6 +100,20 @@ export default {
       canSeePass: false,
       isShowGender: false,
       gender: '',
+      //裁剪组件的基础配置option
+      option: {
+        img: '', // 裁剪图片的地址
+        info: true, // 裁剪框的大小信息
+        outputSize: 1, // 裁剪生成图片的质量
+        outputType: 'jpg', // 裁剪生成图片的格式
+        canScale: true, // 图片是否允许滚轮缩放
+        autoCrop: true, // 是否默认生成截图框
+        autoCropWidth: 150, // 默认生成截图框宽度
+        autoCropHeight: 150, // 默认生成截图框高度
+        fixed: true, // 是否开启截图框宽高固定比例
+        fixedNumber: [1, 1], // 截图框的宽高比例
+      },
+      isShowMask: false,
     }
   },
   created() {
@@ -146,28 +185,57 @@ export default {
     },
     // xhr2.0新增了formData的语法,可以用正常的传输数据,可以一步文件上传
     // 在文件选择完成之后,可以得到文件对象,需要自行上传(异步文件上传=>formData)
-    async afterRead(file) {
+    afterRead(file) {
+      // 返回数据来后,显示截图矿
+      this.isShowMask = true
+      // 并且将预览图片赋值给截图矿的img,用于截取
+      this.option.img = file.content
       // console.log(file)
       // file.content base64字符串的图片,可以用于预览(裁剪的时候哦用)
       // file.file 真实的用于上传的文件对象
-      const formData = new FormData()
-      // 将要上传的内容append到这个formdata对象身上
-      // append(name名,值) 只可以是文件对象
-      formData.append('file', file.file)
-      // axios也支持formData格式的数据上传,这个也只是在将图片上传到后台服务器,并没有图片直接修改掉
-      const res = await this.$axios.post('/upload', formData)
-      // console.log(res)
-      const { statusCode, data } = res.data
-      if (statusCode === 200) {
-        // 发送axios请求来进行修改图片
-        this.editUserInfo({
-          head_img: data.url,
-        })
-      }
+      // const formData = new FormData()
+      // // 将要上传的内容append到这个formdata对象身上
+      // // append(name名,值) 只可以是文件对象
+      // formData.append('file', file.file)
+      // // axios也支持formData格式的数据上传,这个也只是在将图片上传到后台服务器,并没有图片直接修改掉
+      // const res = await this.$axios.post('/upload', formData)
+      // // console.log(res)
+      // const { statusCode, data } = res.data
+      // if (statusCode === 200) {
+      //   // 发送axios请求来进行修改图片
+      //   this.editUserInfo({
+      //     head_img: data.url,
+      //   })
+      // }
+    },
+    crop() {
+      // 获取截图的blob数据
+      this.$refs.cropper.getCropBlob(async (imgData) => {
+        // do something
+        // file.content base64字符串的图片,可以用于预览(裁剪的时候哦用)
+        // file.file 真实的用于上传的文件对象
+        const formData = new FormData()
+        // 将要上传的内容append到这个formdata对象身上
+        // append(name名,值) 只可以是文件对象
+        formData.append('file', imgData)
+        // axios也支持formData格式的数据上传,这个也只是在将图片上传到后台服务器,并没有图片直接修改掉
+        const res = await this.$axios.post('/upload', formData)
+        // console.log(res)
+        const { statusCode, data } = res.data
+        if (statusCode === 200) {
+          // 发送axios请求来进行修改图片
+          this.editUserInfo({
+            head_img: data.url,
+          })
+        }
+        this.isShowMask = false
+      })
+    },
+    cancel() {
+      this.isShowMask = false
     },
     // 代码备份,版本控制工具
   },
-
   computed: {
     imgUrls() {
       return this.$axios.defaults.baseURL + this.profile.head_img
@@ -212,6 +280,23 @@ export default {
     .van-radio-group {
       padding: 20px 0;
       justify-content: space-around;
+    }
+  }
+  .mask {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    .crop {
+      position: absolute;
+      left: 20px;
+      bottom: 20px;
+    }
+    .cancel {
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
     }
   }
 }

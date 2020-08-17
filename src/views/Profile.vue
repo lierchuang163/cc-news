@@ -17,9 +17,21 @@
       </div>
     </div>
     <div class="list">
-      <cc-nav @click="fn" name="我的关注" desc="关注的用户"></cc-nav>
-      <cc-nav @click="fn" name="我的跟帖" desc="跟帖/回复"></cc-nav>
-      <cc-nav @click="fn" name="我的收藏" desc="文章/视频"></cc-nav>
+      <cc-nav
+        @click="$router.push('/myfocus')"
+        name="我的关注"
+        desc="关注的用户"
+      ></cc-nav>
+      <cc-nav
+        @click="$router.push('/comments')"
+        name="我的跟帖"
+        desc="跟帖/回复"
+      ></cc-nav>
+      <cc-nav
+        @click="$router.push('/favorite')"
+        name="我的收藏"
+        desc="文章/视频"
+      ></cc-nav>
       <cc-nav @click="$router.push('/editinfo')" name="设置"></cc-nav>
     </div>
     <div class="logout-btn">
@@ -63,10 +75,10 @@ export default {
     }
   },
   methods: {
-    fn() {
-      // console.log(11)
-      this.$router.push('/myfocus')
-    },
+    // fn() {
+    //   // console.log(11)
+    //   this.
+    // },
     // toEditInfo() {
     //   this.$router.push('/editinfo')
     // },
