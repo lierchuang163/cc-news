@@ -38,11 +38,24 @@ Vue.use(List)
 Vue.use(Tab)
 Vue.use(Tabs)
 Vue.use(PullRefresh)
+// 这是注册全局过滤器,用于处理时间格式
 Vue.filter('time', (value, str = 'YYYY-MM-DD') => {
   return moment(value).format(str)
 })
+// 这是注册全局过滤器,用于处理图片路径的问题,
 Vue.filter('fixUrl', (value) => {
   return axios.defaults.baseURL + value
+})
+// 注册一个全局过滤器,用于处理时间格式
+Vue.filter('timeCalc', (value) => {
+  moment.locale('zh-cn')
+  return moment(value).fromNow()
+})
+// 这是注册全局自定义指令
+Vue.directive('focus', {
+  inserted: (el) => {
+    el.focus()
+  },
 })
 Vue.component('cc-nav', CcNav)
 Vue.component('cc-bar', CcBar)

@@ -126,7 +126,7 @@ export default {
     },
     onRefresh() {
       console.log('下拉刷新了')
-      setTimeout(() => {
+      setTimeout(async () => {
         const index = this.active
         // 下来刷新,要清空当前这一栏之前存的数据
         this.tabList[index].posts = []
@@ -135,7 +135,7 @@ export default {
         this.tabList[index].loading = false
         this.tabList[index].finished = false
         // 重新获取当前页的数据
-        this.getPostList()
+        await this.getPostList()
         this.tabList[index].finished = true
         // 下拉刷新完成了,当前页的isLoading页需要改为false
         this.tabList[index].isLoading = false

@@ -1,5 +1,5 @@
 <template>
-  <div class="post-detail">
+  <div class="post-detail" v-if="!loading">
     <!-- 这是头部 -->
     <div class="header">
       <div class="left" @click="$router.go(-1)">
@@ -14,7 +14,7 @@
       </div>
     </div>
     <!-- 这是详情信息 -->
-    <div class="info">
+    <!-- <div class="info">
       <div class="info-title">
         <div class="title">{{ post.title }}</div>
         <div class="bottom">
@@ -28,7 +28,7 @@
         <video :src="post.content" controls></video>
       </div>
       <div v-else class="content" v-html="post.content"></div>
-    </div>
+    </div> -->
     <!-- 这是点赞 -->
     <div class="star">
       <div class="left" @click="like">
@@ -41,28 +41,70 @@
       </div>
     </div>
 
+    <!-- 这是评论区 -->
+    <div class="comment">
+      <h3>精彩跟帖</h3>
+      <p v-if="commentList.length === 0">暂无跟帖,抢占沙发</p>
+      <cc-comment
+        @reply="reply"
+        v-else
+        v-for="item in commentList"
+        :key="item.id"
+        :list="item"
+      ></cc-comment>
+      <div class="empty"></div>
+    </div>
+
     <!-- 这是底部 -->
     <div class="footer">
-      <input type="text" placeholder="写跟帖" />
-      <div class="comments">
-        <i class="iconfont iconpinglun-"></i>
-        <span class="num">1020</span>
+      <div class="input" v-if="isShowBox">
+        <input @focus="handleFocus" type="text" placeholder="写跟帖" />
+        <div class="comments">
+          <i class="iconfont iconpinglun-"></i>
+          <span class="num">{{ commentList.length }}</span>
+        </div>
+        <i
+          @click="love"
+          class="iconfont iconshoucang"
+          :class="{ like: post.has_star }"
+        ></i>
+        <i class="iconfont iconfenxiang"></i>
       </div>
-      <i class="iconfont iconshoucang"></i>
-      <i class="iconfont iconfenxiang"></i>
+      <div class="textarea" v-else>
+        <textarea
+          :placeholder="placeholder"
+          v-model="content"
+          @blur="loseBlur"
+          v-focus
+          rows="3"
+        >
+        </textarea>
+        <button @click="send">发送</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import CcComment from 'components/cc-comment.vue'
 export default {
+  components: {
+    CcComment,
+  },
   data() {
     return {
       post: {},
+      loading: true,
+      isShowBox: true,
+      commentList: [],
+      content: '',
+      parent_id: '',
+      placeholder: '回复:',
     }
   },
-  created() {
-    this.getPostDetail()
+  async created() {
+    await this.getPostDetail()
+    this.getCommentList()
   },
   methods: {
     async getPostDetail() {
@@ -73,7 +115,17 @@ export default {
       const { statusCode, data } = res.data
       if (statusCode === 200) {
         this.post = data
-        console.log(this.post.user.nickname)
+        this.loading = false
+        // console.log(this.post)
+      }
+    },
+    async getCommentList() {
+      const id = this.$route.params.id
+      const res = await this.$axios.get(`/post_comment/${id}`)
+      // console.log(res)
+      const { statusCode, data } = res.data
+      if (statusCode === 200) {
+        this.commentList = data
       }
     },
     async follow() {
@@ -109,6 +161,62 @@ export default {
         this.getPostDetail()
       }
     },
+    async love() {
+      const id = this.$route.params.id
+      const res = await this.$axios.get(`/post_star/${id}`)
+      console.log(res)
+      const { statusCode, message } = res.data
+      if (statusCode === 200) {
+        this.getPostDetail()
+        this.$toast.success(message)
+      }
+    },
+    handleFocus() {
+      this.isShowBox = false
+      // vue是异步更新的,想要拿到更新后的数据,可以通过$nextTick来获取更新后的数据
+      // this.$nextTick(() => {
+      //   this.$refs.txt.focus()
+      // })
+    },
+    loseBlur() {
+      if (this.content !== '') return
+      this.isShowBox = true
+      // 清空父评论id
+      this.parent_id = ''
+      // 修改提示为回复
+      this.placeholder = '回复'
+    },
+    async send() {
+      // 首先判断是否输入为空,让代码更加健壮
+      if (this.content.trim() === '') return
+      const id = this.$route.params.id
+      const res = await this.$axios.post(`/post_comment/${id}`, {
+        content: this.content,
+        parent_id: this.parent_id,
+      })
+      console.log(res)
+      const { statusCode, message } = res.data
+      if (statusCode === 200) {
+        this.$toast.success(message)
+        // 清空内容
+        this.content = ''
+        // 清空父评论id
+        this.parent_id = ''
+        // 修改提示为回复
+        this.placeholder = '回复'
+        // 关闭文本域
+        this.isShowBox = true
+        // 调用获取评论列表的方法
+        this.getCommentList()
+      }
+    },
+    reply(id, nickname) {
+      // 一点击回复就显示文本域,进行输入
+      this.isShowBox = false
+      // 将nickanme和id进行赋值
+      this.parent_id = id
+      this.placeholder = `回复:${nickname}`
+    },
   },
   watch: {
     $route() {
@@ -121,10 +229,10 @@ export default {
 
 <style lang="scss" scoped>
 .post-detail {
-  padding: 0 10px;
   .header {
     display: flex;
     height: 50px;
+    padding: 10px;
     line-height: 50px;
     justify-content: space-between;
     align-items: center;
@@ -160,6 +268,7 @@ export default {
     }
   }
   .info {
+    padding: 10px;
     .info-title {
       display: flex;
       flex-direction: column;
@@ -188,13 +297,14 @@ export default {
   }
   video {
     width: 100%;
+    padding: 10px;
   }
   .star {
     padding: 15px;
     display: flex;
     justify-content: space-around;
     border-bottom: 5px solid #e4e4e4;
-
+    margin-bottom: 10px;
     .left,
     .right {
       width: 100px;
@@ -230,40 +340,91 @@ export default {
       }
     }
   }
-  .footer {
-    display: flex;
-    padding: 0 5px;
-    justify-content: space-between;
-    align-items: center;
-    height: 80px;
-    line-height: 80px;
-    input {
-      width: 200px;
-      height: 40px;
-      background-color: #d7d7d7;
-      border-radius: 20px;
-      padding-left: 20px;
-      font-size: 12px;
+  .comment {
+    h3 {
+      text-align: center;
+      font-size: 20px;
+      height: 50px;
+      line-height: 50px;
     }
-    .comments {
-      margin-right: 5px;
-      position: relative;
+    p {
+      font-size: 20px;
+      text-align: center;
+    }
+  }
+  .footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    padding: 0 5px;
+    width: 100%;
+    border-top: 1px solid #ccc;
+    background-color: #f2f2f2;
+    .input {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 50px;
+      input {
+        width: 200px;
+        height: 40px;
+        background-color: #d7d7d7;
+        border-radius: 20px;
+        padding-left: 20px;
+        font-size: 12px;
+      }
+      .comments {
+        margin-right: 5px;
+        position: relative;
+        i {
+          font-size: 25px;
+        }
+        .num {
+          position: absolute;
+          left: 10px;
+          top: 0;
+          color: white;
+          background-color: red;
+          width: 35px;
+          height: 20px;
+          line-height: 20px;
+          border-radius: 10px;
+          text-align: center;
+        }
+      }
       i {
         font-size: 25px;
       }
-      .num {
-        position: absolute;
-        left: 0;
-        top: 0;
-        color: white;
-        background-color: red;
-        width: 35px;
-        height: 20px;
+      .like {
+        color: red;
       }
     }
-    i {
-      font-size: 25px;
+    .textarea {
+      padding: 10px 10px;
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      textarea {
+        width: 260px;
+        height: 90px;
+        margin-top: 20px;
+        background-color: #d7d7d7;
+        border-radius: 15px;
+        padding: 10px;
+        font-size: 14px;
+      }
+      button {
+        width: 60px;
+        height: 26px;
+        font-size: 14px;
+        background-color: red;
+        border-radius: 23px;
+        color: white;
+      }
     }
+  }
+  .empty {
+    height: 30px;
   }
 }
 </style>
