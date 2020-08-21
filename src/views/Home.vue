@@ -4,7 +4,7 @@
       <div class="index" @click="$router.push('/home')">
         <i class="iconfont iconnew"></i>
       </div>
-      <div class="search">
+      <div class="search" @click="$router.push('/search')">
         <i class="iconfont iconsearch"></i>
         <span>搜索新闻</span>
       </div>
@@ -52,8 +52,24 @@ export default {
     }
   },
   async created() {
-    // 只有先获得tab栏中的数据,才能接着请求文章的数据
-    await this.getTabList()
+    const loveTabsList = JSON.parse(localStorage.getItem('loveTabsList'))
+    if (loveTabsList) {
+      loveTabsList.forEach((item) => {
+        item.posts = []
+        // 每个tab都有自己的pageIndex,记录着每个tab加载到了第几页
+        item.pageIndex = 1
+        // 下拉时没有发送请求
+        item.loading = false
+        // 还有数据可以请求
+        item.finished = false
+        // 是否可以处于下拉刷新
+        item.isLoading = false
+      })
+      this.tabList = loveTabsList
+    } else {
+      // 只有先获得tab栏中的数据,才能接着请求文章的数据
+      await this.getTabList()
+    }
     this.getPostList()
   },
   methods: {
@@ -133,10 +149,10 @@ export default {
         // 且在下拉刷新的时候,应该重置从第一页开始展示,重置pageIndex,loading.finshed
         this.tabList[index].pageIndex = 1
         this.tabList[index].loading = false
-        this.tabList[index].finished = false
+        this.tabList[index].finished = true
         // 重新获取当前页的数据
         await this.getPostList()
-        this.tabList[index].finished = true
+        this.tabList[index].finished = false
         // 下拉刷新完成了,当前页的isLoading页需要改为false
         this.tabList[index].isLoading = false
         // 给用于一个提示刷新成功

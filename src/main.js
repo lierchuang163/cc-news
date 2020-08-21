@@ -20,6 +20,7 @@ import {
   Tab,
   Tabs,
   PullRefresh,
+  Search,
 } from 'vant'
 import axios from 'axios'
 import CcNav from 'components/cc-nav.vue'
@@ -28,6 +29,7 @@ import CcPost from 'components/cc-post.vue'
 // 在Vue中注册一下
 Vue.config.productionTip = false
 Vue.use(Field)
+Vue.use(Search)
 Vue.use(Toast)
 Vue.use(Button)
 Vue.use(Dialog)

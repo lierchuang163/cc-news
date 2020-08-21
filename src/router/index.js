@@ -9,6 +9,8 @@ import Favorite from 'views/Favorite.vue'
 import Comments from 'views/Comments.vue'
 import Home from 'views/Home.vue'
 import PostDetail from 'views/PostDetail.vue'
+import TabManage from 'views/TabManage.vue'
+import Search from 'views/Search.vue'
 import Test from 'views/Test.vue'
 Vue.use(VueRouter)
 
@@ -33,6 +35,8 @@ const router = new VueRouter({
     { path: '/comments', name: 'comments', component: Comments },
     { path: '/home', name: 'home', component: Home },
     { path: '/post-detail/:id', name: 'post-detail', component: PostDetail },
+    { path: '/tab-manage', name: 'tab-manage', component: TabManage },
+    { path: '/search', name: 'search', component: Search },
     { path: '/test', name: 'test', component: Test },
   ],
 })

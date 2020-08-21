@@ -15,6 +15,7 @@
     <!-- 这是递归组件 -->
     <div v-show="isShowReply">
       <cc-floor
+        @reply="reply"
         :index="index"
         v-if="list.parent"
         :list="list.parent"

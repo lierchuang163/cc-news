@@ -1,5 +1,6 @@
 <template>
   <div class="profile">
+    <cc-bar title="个人中心"></cc-bar>
     <div class="user-info" @click="$router.push('/editinfo')">
       <div class="avatar">
         <img :src="imgUrl" alt="" />
@@ -32,6 +33,7 @@
         name="我的收藏"
         desc="文章/视频"
       ></cc-nav>
+      <cc-nav @click="$router.push('/tab-manage')" name="导航列表"></cc-nav>
       <cc-nav @click="$router.push('/editinfo')" name="设置"></cc-nav>
     </div>
     <div class="logout-btn">

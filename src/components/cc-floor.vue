@@ -2,6 +2,7 @@
   <div class="cc-floor">
     <!-- 这是父评论的样式 -->
     <cc-floor
+      @reply="reply"
       v-if="list.parent"
       :list="list.parent"
       :index="index - 1"
@@ -11,7 +12,7 @@
         <span>{{ index }}楼: {{ list.user.nickname }}</span>
         <span>{{ list.create_date | timeCalc }}</span>
       </div>
-      <div class="reply">回复</div>
+      <div class="reply" @click="reply(list.id, list.user.nickname)">回复</div>
     </div>
     <div class="footer">
       {{ list.content }}
@@ -28,6 +29,11 @@ export default {
     },
     index: {
       type: Number,
+    },
+  },
+  methods: {
+    reply(id, nickname) {
+      this.$emit('reply', id, nickname)
     },
   },
 }

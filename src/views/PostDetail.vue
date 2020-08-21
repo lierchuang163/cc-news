@@ -14,7 +14,7 @@
       </div>
     </div>
     <!-- 这是详情信息 -->
-    <!-- <div class="info">
+    <div class="info">
       <div class="info-title">
         <div class="title">{{ post.title }}</div>
         <div class="bottom">
@@ -28,7 +28,7 @@
         <video :src="post.content" controls></video>
       </div>
       <div v-else class="content" v-html="post.content"></div>
-    </div> -->
+    </div>
     <!-- 这是点赞 -->
     <div class="star">
       <div class="left" @click="like">
@@ -111,7 +111,7 @@ export default {
       // id要从动态路由中获取
       const id = this.$route.params.id
       const res = await this.$axios.get(`/post/${id}`)
-      // console.log(res)
+      console.log(res)
       const { statusCode, data } = res.data
       if (statusCode === 200) {
         this.post = data
@@ -136,7 +136,7 @@ export default {
       const { statusCode, message } = res.data
       if (statusCode === 200) {
         this.$toast.success(message)
-        this.getPostDetail()
+        await this.getPostDetail()
       }
     },
     async unfollow() {
@@ -147,7 +147,7 @@ export default {
       const { statusCode, message } = res.data
       if (statusCode === 200) {
         this.$toast.success(message)
-        this.getPostDetail()
+        await this.getPostDetail()
       }
     },
     async like() {
@@ -158,7 +158,7 @@ export default {
       const { statusCode, message } = res.data
       if (statusCode === 200) {
         this.$toast.success(message)
-        this.getPostDetail()
+        await this.getPostDetail()
       }
     },
     async love() {
@@ -167,7 +167,7 @@ export default {
       console.log(res)
       const { statusCode, message } = res.data
       if (statusCode === 200) {
-        this.getPostDetail()
+        await this.getPostDetail()
         this.$toast.success(message)
       }
     },
@@ -179,7 +179,7 @@ export default {
       // })
     },
     loseBlur() {
-      if (this.content !== '') return
+      if (this.content.trim() !== '') return
       this.isShowBox = true
       // 清空父评论id
       this.parent_id = ''
